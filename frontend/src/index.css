@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F3F0E6;
+  --color-ink: #28261F;
+  --color-terra: #C97A3F;
+  --color-terraDark: #B86B32;
+  --color-sage: #6B8F68;
+  --color-border: #DDD8C8;
+  --color-muted: #5B5847;
+  --color-label: #9A9684;
+
+  --font-editorial: 'Fraunces', serif;
+  --font-tech: 'Space Grotesk', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, rgba(40,38,31,0.04) 1px, transparent 1px),
+                     linear-gradient(to bottom, rgba(40,38,31,0.04) 1px, transparent 1px);
+}
+.bg-grid-size {
+  background-size: 32px 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-float {
+    animation: none !important;
+  }
+}
+
+@keyframes scroll {
+  to { transform: translateX(-50%); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+.animate-marquee {
+  animation: scroll 60s linear infinite;
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
