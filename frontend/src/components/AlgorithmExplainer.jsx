@@ -40,7 +40,6 @@ const ALGORITHMS = [
     color: 'terra',
   },
 ]
-
 const AlgorithmExplainer = ({ currentAlgorithm }) => {
   return (
     <div className="mt-12 mb-4">
@@ -48,9 +47,7 @@ const AlgorithmExplainer = ({ currentAlgorithm }) => {
         <h3 className="text-2xl font-black font-editorial tracking-tight text-ink mb-2">
           The Logic Behind the Line
         </h3>
-        
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {ALGORITHMS.map((algo) => {
           const isActive = currentAlgorithm === algo.key
@@ -68,9 +65,7 @@ const AlgorithmExplainer = ({ currentAlgorithm }) => {
                   Active
                 </div>
               )}
-
               <div className="text-3xl mb-3">{algo.emoji}</div>
-
               <h4 className="text-base font-black font-editorial text-ink mb-0.5 tracking-tight">
                 {algo.name}
               </h4>
@@ -79,11 +74,9 @@ const AlgorithmExplainer = ({ currentAlgorithm }) => {
               }`}>
                 {algo.tagline}
               </p>
-
               <p className="text-sm text-muted leading-relaxed mb-4 font-medium">
                 {algo.explanation}
               </p>
-
               <div className="border-t border-border pt-3">
                 <p className="text-xs text-label font-tech">
                   <span className="font-bold uppercase tracking-widest">Best for: </span>
@@ -97,5 +90,4 @@ const AlgorithmExplainer = ({ currentAlgorithm }) => {
     </div>
   )
 }
-
 export default AlgorithmExplainer

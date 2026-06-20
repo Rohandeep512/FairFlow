@@ -2,7 +2,20 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../utils/api.js'
 import { getMetric } from '../utils/serviceMetrics.js'
-
+const StarRating = ({ value, onChange }) => (
+  <div className="flex gap-1">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <button
+        key={star}
+        type="button"
+        onClick={() => onChange(star)}
+        className={`text-2xl transition-colors ${star <= value ? 'text-terra' : 'text-border hover:text-terra/50'}`}
+      >
+        ★
+      </button>
+    ))}
+  </div>
+)
 const CustomerJoin = () => {
   const [step, setStep] = useState('code')
   const [joinCode, setJoinCode] = useState('')
@@ -10,12 +23,13 @@ const CustomerJoin = () => {
   const [phone, setPhone] = useState('')
   const [jobSize, setJobSize] = useState('')
   const [serviceType, setServiceType] = useState('general')
+  const [algorithm, setAlgorithm] = useState('')
+  const [priorityStars, setPriorityStars] = useState(0)
+  const [priorityMessage, setPriorityMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-
   const metric = getMetric(serviceType)
-
   const handleJoin = async (e) => {
     e.preventDefault()
     setError('')
@@ -28,12 +42,15 @@ const CustomerJoin = () => {
       })
       localStorage.setItem('customer_token', res.data.token)
       localStorage.setItem('customer_role', 'customer')
-      // Fetch session info to get the service_type for dynamic labels
+      if (res.data.already_in_queue) {
+        navigate('/queue-status')
+        return
+      }
       try {
         const sessionRes = await api.get(`/session/${res.data.session_id}`)
         setServiceType(sessionRes.data.service_type || 'general')
+        setAlgorithm(sessionRes.data.algorithm || '')
       } catch {
-        // Fallback to general if session fetch fails
       }
       setStep('job')
     } catch (err) {
@@ -42,13 +59,17 @@ const CustomerJoin = () => {
       setLoading(false)
     }
   }
-
   const handleSubmitJob = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await api.post('/job/submit', { job_size: jobSize })
+      const payload = { job_size: jobSize }
+      if (algorithm === 'priority') {
+        payload.priority_stars = priorityStars
+        payload.priority_message = priorityMessage
+      }
+      await api.post('/job/submit', payload)
       navigate('/queue-status')
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to submit job')
@@ -56,18 +77,15 @@ const CustomerJoin = () => {
       setLoading(false)
     }
   }
-
   return (
     <div className="bg-paper bg-grid-pattern bg-grid-size min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl border border-border shadow-[0_25px_50px_-12px_rgba(40,38,31,0.1)] p-10">
         <Link to="/" className="text-2xl font-black font-editorial tracking-tight text-ink block mb-8">FairFlow.</Link>
-
         {error && (
           <div className="bg-terra/10 border border-terra/30 text-terra text-sm font-medium rounded-xl px-4 py-3 mb-6">
             {error}
           </div>
         )}
-
         {step === 'code' ? (
           <>
             <h1 className="text-3xl font-black font-editorial tracking-tight text-ink mb-2">Join a queue</h1>
@@ -130,6 +148,25 @@ const CustomerJoin = () => {
                   placeholder={metric.placeholder}
                 />
               </div>
+              {algorithm === 'priority' && (
+                <>
+                  <div>
+                    <label className="text-xs font-bold font-tech uppercase tracking-widest text-muted block mb-2">How urgent is this?</label>
+                    <StarRating value={priorityStars} onChange={setPriorityStars} />
+                    <p className="text-xs text-muted mt-1">1 = not urgent, 5 = critical</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold font-tech uppercase tracking-widest text-muted block mb-2">Reason (optional)</label>
+                    <textarea
+                      value={priorityMessage}
+                      onChange={(e) => setPriorityMessage(e.target.value)}
+                      rows={2}
+                      className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sage transition-colors resize-none"
+                      placeholder="e.g. I have a class in 15 minutes"
+                    />
+                  </div>
+                </>
+              )}
               <button type="submit" disabled={loading} className="bg-terra text-paper py-3.5 font-bold font-tech uppercase tracking-wider text-sm rounded-full mt-2 disabled:opacity-50">
                 {loading ? 'Submitting...' : 'Join queue'}
               </button>
@@ -140,5 +177,4 @@ const CustomerJoin = () => {
     </div>
   )
 }
-
 export default CustomerJoin

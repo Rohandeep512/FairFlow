@@ -1,16 +1,17 @@
 import pool from '../config/db.js';
 import { computeQueue, computeMetrics, estimateWaitTime } from '../utils/scheduler.js';
-
 export const submitJob = async (req, res) => {
-  const { job_size } = req.body;
+  const { job_size, priority_stars, priority_message } = req.body;
   const { session_id, id: customer_id } = req.user;
   if (!job_size || Number(job_size) <= 0) return res.status(400).json({ error: 'Valid job size required' });
   try {
     const session = await pool.query('SELECT id FROM queue_sessions WHERE id = $1 AND status = $2', [session_id, 'active']);
     if (!session.rows.length) return res.status(400).json({ error: 'Session is not active' });
+    const stars = Math.min(5, Math.max(0, Number(priority_stars) || 0));
+    await pool.query('DELETE FROM users WHERE is_demo = TRUE AND id IN (SELECT customer_id FROM jobs WHERE session_id = $1)', [session_id]);
     const result = await pool.query(
-      'INSERT INTO jobs (session_id, customer_id, job_size) VALUES ($1, $2, $3) RETURNING *',
-      [session_id, customer_id, job_size]
+      'INSERT INTO jobs (session_id, customer_id, job_size, priority_stars, priority_message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [session_id, customer_id, job_size, stars, priority_message || null]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -18,7 +19,6 @@ export const submitJob = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const exitQueue = async (req, res) => {
   const { session_id, id: customer_id } = req.user;
   try {
@@ -33,7 +33,6 @@ export const exitQueue = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getSessionJobs = async (req, res) => {
   try {
     const session = await pool.query('SELECT * FROM queue_sessions WHERE id = $1', [req.params.id]);
@@ -54,7 +53,6 @@ export const getSessionJobs = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const startNextJob = async (req, res) => {
   try {
     const processing = await pool.query('SELECT id FROM jobs WHERE session_id = $1 AND status = $2', [req.params.id, 'processing']);
@@ -74,7 +72,6 @@ export const startNextJob = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const completeJob = async (req, res) => {
   try {
     const job = await pool.query('SELECT * FROM jobs WHERE id = $1 AND status = $2', [req.params.jobId, 'processing']);
@@ -88,7 +85,6 @@ export const completeJob = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getMyJob = async (req, res) => {
   const { session_id, id: customer_id } = req.user;
   try {
@@ -107,7 +103,6 @@ export const getMyJob = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const requestEmergency = async (req, res) => {
   const { reason } = req.body;
   const { id: customer_id, session_id } = req.user;
@@ -127,7 +122,6 @@ export const requestEmergency = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const resolveEmergency = async (req, res) => {
   const { status } = req.body;
   if (!['approved', 'rejected'].includes(status)) return res.status(400).json({ error: 'Status must be approved or rejected' });
@@ -144,7 +138,6 @@ export const resolveEmergency = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const compareAlgorithms = async (req, res) => {
   try {
     const jobs = await pool.query('SELECT * FROM jobs WHERE session_id = $1', [req.params.id]);
@@ -164,6 +157,73 @@ export const compareAlgorithms = async (req, res) => {
       };
     }
     res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+const JOB_RANGES = {
+  print:      { min: 1, max: 100 },
+  equipment:  { min: 15, max: 120 },
+  healthcare: { min: 5, max: 45 },
+  support:    { min: 1, max: 10 },
+  food:       { min: 1, max: 15 },
+  general:    { min: 1, max: 50 },
+};
+const NAMES = [
+  'Aarav Sharma', 'Ananya Gupta', 'Vihaan Patel', 'Diya Reddy', 'Arjun Mehta',
+  'Kiara Nair', 'Dhruv Joshi', 'Sneha Kapoor', 'Kabir Singh', 'Myra Verma',
+  'Rahul Desai', 'Isha Malhotra', 'Arnav Kulkarni', 'Riya Choudhary', 'Neil Iyer',
+];
+const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const randPhone = () => `9${rand(100000000, 999999999)}`;
+export const fillDemo = async (req, res) => {
+  try {
+    const session = await pool.query(
+      `SELECT qs.id, qs.status, o.service_type 
+       FROM queue_sessions qs 
+       JOIN organizations o ON qs.org_id = o.id 
+       WHERE qs.id = $1`,
+      [req.params.id]
+    );
+    if (!session.rows.length) return res.status(404).json({ error: 'Session not found' });
+    if (session.rows[0].status !== 'active') return res.status(400).json({ error: 'Session is not active' });
+    const serviceType = session.rows[0].service_type;
+    const range = JOB_RANGES[serviceType] || JOB_RANGES.general;
+    for (let i = 0; i < 15; i++) {
+      const name = NAMES[i];
+      const phone = randPhone();
+      const jobSize = rand(range.min, range.max);
+      const stars = rand(0, 5);
+      const userResult = await pool.query(
+        'INSERT INTO users (name, phone, role, is_demo) VALUES ($1, $2, $3, $4) RETURNING id',
+        [name, phone, 'customer', true]
+      );
+      const customerId = userResult.rows[0].id;
+      await pool.query(
+        'INSERT INTO jobs (session_id, customer_id, job_size, priority_stars, is_demo) VALUES ($1, $2, $3, $4, $5)',
+        [req.params.id, customerId, jobSize, stars, true]
+      );
+    }
+    const demoJobs = await pool.query('SELECT id FROM jobs WHERE session_id = $1 AND is_demo = TRUE ORDER BY id LIMIT 2', [req.params.id]);
+    if (demoJobs.rows.length >= 2) {
+      await pool.query(
+        "INSERT INTO emergency_requests (job_id, reason, status) VALUES ($1, $2, 'pending')",
+        [demoJobs.rows[0].id, 'I have a flight to catch in 1 hour']
+      );
+      await pool.query(
+        "INSERT INTO emergency_requests (job_id, reason, status) VALUES ($1, $2, 'pending')",
+        [demoJobs.rows[1].id, 'I have a lecture scheduled in 30 mins']
+      );
+    }
+    res.json({ message: 'Demo jobs inserted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const clearDemo = async (req, res) => {
+  try {
+    await pool.query('DELETE FROM users WHERE is_demo = TRUE AND id IN (SELECT customer_id FROM jobs WHERE session_id = $1 AND is_demo = TRUE)', [req.params.id]);
+    res.json({ message: 'Demo entries cleared successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

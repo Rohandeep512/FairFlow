@@ -1,5 +1,3 @@
-// Service metric label/placeholder mapping by organization service_type
-// The DB column remains `job_size NUMERIC` — this is purely a UX layer.
 
 const SERVICE_METRICS = {
   print: {
@@ -39,8 +37,6 @@ const SERVICE_METRICS = {
     columnHeader: 'Size',
   },
 }
-
 export const getMetric = (serviceType) =>
   SERVICE_METRICS[serviceType] ?? SERVICE_METRICS.general
-
 export default SERVICE_METRICS

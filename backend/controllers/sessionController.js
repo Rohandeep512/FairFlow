@@ -1,8 +1,6 @@
 import pool from '../config/db.js';
 import { getAlgorithmRecommendation, predictCompletion } from '../utils/aiAdvisor.js';
-
 const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
-
 export const createSession = async (req, res) => {
   const { org_id, algorithm, aging_enabled, time_quantum } = req.body;
   if (!org_id || !algorithm) return res.status(400).json({ error: 'org_id and algorithm required' });
@@ -23,7 +21,6 @@ export const createSession = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getSession = async (req, res) => {
   try {
     const result = await pool.query(`
@@ -38,7 +35,6 @@ export const getSession = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const endSession = async (req, res) => {
   try {
     const processing = await pool.query('SELECT id FROM jobs WHERE session_id = $1 AND status = $2', [req.params.id, 'processing']);
@@ -49,22 +45,18 @@ export const endSession = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getAIRecommendation = async (req, res) => {
   try {
     const session = await pool.query('SELECT qs.*, o.service_type FROM queue_sessions qs JOIN organizations o ON qs.org_id = o.id WHERE qs.id = $1', [req.params.id]);
     if (!session.rows.length) return res.status(404).json({ error: 'Session not found' });
-    if (session.rows[0].ai_recommendation) return res.json(session.rows[0].ai_recommendation);
     const jobs = await pool.query('SELECT job_size FROM jobs WHERE session_id = $1', [req.params.id]);
     const jobSizes = jobs.rows.map(j => Number(j.job_size));
     const recommendation = await getAlgorithmRecommendation(session.rows[0].service_type, jobSizes);
-    await pool.query('UPDATE queue_sessions SET ai_recommendation = $1 WHERE id = $2', [JSON.stringify(recommendation), req.params.id]);
     res.json(recommendation);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getPrediction = async (req, res) => {
   try {
     const session = await pool.query('SELECT algorithm FROM queue_sessions WHERE id = $1', [req.params.id]);

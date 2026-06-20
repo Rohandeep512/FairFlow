@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../utils/api.js'
-
 const SERVICE_TYPES = [
   { value: 'print', label: 'Print services' },
   { value: 'equipment', label: 'Facilities & Equipment' },
@@ -10,14 +9,12 @@ const SERVICE_TYPES = [
   { value: 'food', label: 'Food & orders' },
   { value: 'general', label: 'General' },
 ]
-
 const ALGORITHMS = [
   { value: 'fcfs', label: 'First come, first served', desc: 'Simple and familiar. Jobs run in arrival order.' },
   { value: 'sjf', label: 'Shortest job first', desc: 'Quickest jobs go first. Cuts average waiting time.' },
   { value: 'rr', label: 'Round robin', desc: 'Everyone gets equal time in turns. Fair for shared equipment.' },
   { value: 'priority', label: 'Priority + aging', desc: 'Urgent jobs go first. The longer you wait, the more important you become.' },
 ]
-
 const getRecommendedAlgorithm = (serviceType) => {
   switch (serviceType) {
     case 'print': return 'sjf';
@@ -29,7 +26,6 @@ const getRecommendedAlgorithm = (serviceType) => {
     default: return 'fcfs';
   }
 }
-
 const AdminDashboard = () => {
   const [orgs, setOrgs] = useState([])
   const [showOrgForm, setShowOrgForm] = useState(false)
@@ -40,12 +36,14 @@ const AdminDashboard = () => {
   const [algorithm, setAlgorithm] = useState('sjf')
   const [timeQuantum, setTimeQuantum] = useState(5)
   const [error, setError] = useState('')
+  const [showAiAdvisor, setShowAiAdvisor] = useState(false)
+  const [aiDescription, setAiDescription] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiResult, setAiResult] = useState(null)
   const navigate = useNavigate()
-
   useEffect(() => {
     fetchOrgs()
   }, [])
-
   const fetchOrgs = async () => {
     try {
       const res = await api.get('/org')
@@ -54,7 +52,6 @@ const AdminDashboard = () => {
       setError('Failed to load organizations')
     }
   }
-
   const handleCreateOrg = async (e) => {
     e.preventDefault()
     setError('')
@@ -67,7 +64,6 @@ const AdminDashboard = () => {
       setError(err.response?.data?.error || 'Failed to create organization')
     }
   }
-
   const handleDeleteOrg = async (orgId) => {
     try {
       await api.delete(`/org/${orgId}`)
@@ -77,7 +73,6 @@ const AdminDashboard = () => {
       setError(err.response?.data?.error || 'Failed to delete organization')
     }
   }
-
   const handleCreateSession = async (orgId) => {
     setError('')
     try {
@@ -93,13 +88,38 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleAiAdvise = async (e) => {
+    e.preventDefault()
+    setAiLoading(true)
+    try {
+      const res = await api.post('/org/ai-advise', { description: aiDescription })
+      setAiResult(res.data)
+      if (ALGORITHMS.find(a => a.value === res.data.algorithm)) {
+        setAlgorithm(res.data.algorithm)
+      }
+    } catch (err) {
+      setError('AI Advisor failed to get a recommendation')
+    }
+    setAiLoading(false)
+  }
+
+  const handleOpenSessionForm = (orgId) => {
+    if (showSessionForm === orgId) {
+      setShowSessionForm(null)
+    } else {
+      setShowSessionForm(orgId)
+      setShowAiAdvisor(false)
+      setAiDescription('')
+      setAiResult(null)
+    }
+  }
+
   const logout = () => {
     localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_role')
     localStorage.removeItem('admin_name')
     navigate('/')
   }
-
   return (
     <div className="bg-paper bg-grid-pattern bg-grid-size min-h-screen">
       <nav className="w-full px-8 py-5 flex justify-between items-center border-b border-border bg-paper/90 backdrop-blur-md sticky top-0 z-50">
@@ -108,7 +128,6 @@ const AdminDashboard = () => {
           Log out
         </button>
       </nav>
-
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-black font-editorial tracking-tight text-ink">Your organizations</h1>
@@ -119,13 +138,11 @@ const AdminDashboard = () => {
             + New organization
           </button>
         </div>
-
         {error && (
           <div className="bg-terra/10 border border-terra/30 text-terra text-sm font-medium rounded-xl px-4 py-3 mb-6">
             {error}
           </div>
         )}
-
         {showOrgForm && (
           <form onSubmit={handleCreateOrg} className="bg-white rounded-2xl border border-border p-8 mb-8 flex flex-col gap-4 max-w-md">
             <div>
@@ -136,7 +153,7 @@ const AdminDashboard = () => {
                 onChange={(e) => setOrgName(e.target.value)}
                 required
                 className="w-full border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sage transition-colors"
-                placeholder="e.g. NSUT Print Shop"
+                placeholder="e.g. Print Shop"
               />
             </div>
             <div>
@@ -156,7 +173,6 @@ const AdminDashboard = () => {
             </button>
           </form>
         )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {orgs.map((org) => (
             <div key={org.id} className="bg-white rounded-2xl border border-border p-8 relative">
@@ -177,15 +193,49 @@ const AdminDashboard = () => {
                   </svg>
                 </button>
               )}
-              
               <div className="font-tech text-xs font-bold uppercase tracking-widest text-label mb-2">
                 {SERVICE_TYPES.find((s) => s.value === org.service_type)?.label}
               </div>
               <h3 className="text-2xl font-black font-editorial text-ink mb-4">{org.name}</h3>
-
               {showSessionForm === org.id ? (
                 <div className="flex flex-col gap-3 mt-4 border-t border-border pt-4">
-                  <label className="text-xs font-bold font-tech uppercase tracking-widest text-muted">Choose algorithm</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-xs font-bold font-tech uppercase tracking-widest text-muted">Choose algorithm</label>
+                    <button 
+                      onClick={(e) => { e.preventDefault(); setShowAiAdvisor(!showAiAdvisor); }}
+                      className="text-xs font-bold font-tech uppercase tracking-widest text-sage hover:underline flex items-center gap-1"
+                    >
+                      <span>✨</span> Ask AI
+                    </button>
+                  </div>
+                  
+                  {showAiAdvisor && (
+                    <div className="bg-sage/5 border border-sage/20 rounded-xl p-4 mb-2">
+                      <label className="text-[10px] font-bold font-tech uppercase tracking-widest text-sage mb-2 block">Describe your service</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={aiDescription}
+                          onChange={(e) => setAiDescription(e.target.value)}
+                          placeholder="e.g. Fast food restaurant"
+                          className="flex-1 bg-white border border-sage/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sage"
+                        />
+                        <button 
+                          onClick={handleAiAdvise}
+                          disabled={aiLoading || !aiDescription}
+                          className="bg-sage text-white px-4 py-2 rounded-lg text-xs font-bold font-tech uppercase tracking-wider disabled:opacity-50"
+                        >
+                          {aiLoading ? '...' : 'Ask'}
+                        </button>
+                      </div>
+                      {aiResult && (
+                        <div className="mt-3 text-sm text-ink bg-white p-3 rounded-lg border border-sage/20">
+                          <strong className="text-sage block mb-1">Recommendation: {ALGORITHMS.find(a => a.value === aiResult.algorithm)?.label || aiResult.algorithm}</strong>
+                          <span className="text-muted">{aiResult.reason}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {ALGORITHMS.map((a) => {
                     const isRecommended = a.value === getRecommendedAlgorithm(org.service_type)
                     return (
@@ -233,7 +283,7 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowSessionForm(org.id)}
+                  onClick={() => handleOpenSessionForm(org.id)}
                   className="text-sm font-bold font-tech uppercase tracking-wider text-terra hover:underline"
                 >
                   Start new session →
@@ -242,7 +292,6 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
-
         {orgs.length === 0 && !showOrgForm && (
           <p className="text-muted text-center mt-16">No organizations yet. Create one to get started.</p>
         )}
@@ -250,5 +299,4 @@ const AdminDashboard = () => {
     </div>
   )
 }
-
 export default AdminDashboard

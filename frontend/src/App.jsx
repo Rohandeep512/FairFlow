@@ -8,7 +8,6 @@ import LiveQueue from './pages/LiveQueue.jsx'
 import CustomerJoin from './pages/CustomerJoin.jsx'
 import CustomerStatus from './pages/CustomerStatus.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-
 function App() {
   return (
     <AuthProvider>
@@ -18,7 +17,6 @@ function App() {
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/join" element={<CustomerJoin />} />
         <Route path="/queue-status" element={<CustomerStatus />} />
-
         <Route element={<ProtectedRoute role="admin" />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/session/:id" element={<LiveQueue />} />
@@ -27,5 +25,4 @@ function App() {
     </AuthProvider>
   )
 }
-
 export default App

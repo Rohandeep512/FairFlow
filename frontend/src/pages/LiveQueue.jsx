@@ -3,9 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import api from '../utils/api.js'
 import AlgorithmExplainer from '../components/AlgorithmExplainer.jsx'
 import { getMetric } from '../utils/serviceMetrics.js'
-
 const ALGO_LABELS = { fcfs: 'First come, first served', sjf: 'Shortest job first', rr: 'Round robin', priority: 'Priority + aging' }
-
 const LiveQueue = () => {
   const { id } = useParams()
   const [session, setSession] = useState(null)
@@ -16,7 +14,6 @@ const LiveQueue = () => {
   const [comparison, setComparison] = useState(null)
   const [loadingAction, setLoadingAction] = useState('')
   const [error, setError] = useState('')
-
   const fetchData = useCallback(async () => {
     try {
       const sessionRes = await api.get(`/session/${id}`)
@@ -28,13 +25,11 @@ const LiveQueue = () => {
       setError('Failed to load session')
     }
   }, [id])
-
   useEffect(() => {
     fetchData()
     const interval = setInterval(fetchData, 5000)
     return () => clearInterval(interval)
   }, [fetchData])
-
   const startNext = async () => {
     setLoadingAction('start')
     setError('')
@@ -47,7 +42,6 @@ const LiveQueue = () => {
       setLoadingAction('')
     }
   }
-
   const completeJob = async (jobId) => {
     setLoadingAction('complete')
     try {
@@ -59,7 +53,6 @@ const LiveQueue = () => {
       setLoadingAction('')
     }
   }
-
   const resolveEmergency = async (emergencyId, status) => {
     try {
       await api.patch(`/job/emergency/${emergencyId}/resolve`, { status })
@@ -68,7 +61,6 @@ const LiveQueue = () => {
       setError(err.response?.data?.error || 'Failed to resolve emergency')
     }
   }
-
   const getAIRecommendation = async () => {
     setLoadingAction('ai')
     try {
@@ -80,7 +72,6 @@ const LiveQueue = () => {
       setLoadingAction('')
     }
   }
-
   const getPrediction = async () => {
     setLoadingAction('predict')
     try {
@@ -92,7 +83,6 @@ const LiveQueue = () => {
       setLoadingAction('')
     }
   }
-
   const compareAlgos = async () => {
     setLoadingAction('compare')
     try {
@@ -104,7 +94,6 @@ const LiveQueue = () => {
       setLoadingAction('')
     }
   }
-
   const endSession = async () => {
     try {
       await api.patch(`/session/${id}/end`)
@@ -113,11 +102,30 @@ const LiveQueue = () => {
       setError(err.response?.data?.error || 'Failed to end session')
     }
   }
-
+  const fillDemo = async () => {
+    setLoadingAction('fillDemo')
+    try {
+      await api.post(`/job/session/${id}/demo`)
+      fetchData()
+    } catch (err) {
+      setError('Failed to fill demo')
+    } finally {
+      setLoadingAction('')
+    }
+  }
+  const clearDemo = async () => {
+    setLoadingAction('clearDemo')
+    try {
+      await api.delete(`/job/session/${id}/demo`)
+      fetchData()
+    } catch (err) {
+      setError('Failed to clear demo')
+    } finally {
+      setLoadingAction('')
+    }
+  }
   if (!session) return <div className="bg-paper min-h-screen flex items-center justify-center text-muted">Loading...</div>
-
   const waitMins = (arrival) => Math.floor((Date.now() - new Date(arrival).getTime()) / 60000)
-
   return (
     <div className="bg-paper bg-grid-pattern bg-grid-size min-h-screen">
       <nav className="w-full px-8 py-5 flex justify-between items-center border-b border-border bg-paper/90 backdrop-blur-md sticky top-0 z-50">
@@ -134,14 +142,12 @@ const LiveQueue = () => {
           )}
         </div>
       </nav>
-
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-10">
         {error && (
           <div className="bg-terra/10 border border-terra/30 text-terra text-sm font-medium rounded-xl px-4 py-3 mb-6">
             {error}
           </div>
         )}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl border border-border p-6 text-center">
             <div className="text-3xl font-black font-editorial text-ink">{metrics?.avgWaitTime ?? 0}</div>
@@ -156,7 +162,6 @@ const LiveQueue = () => {
             <div className="text-xs font-tech uppercase tracking-widest text-muted mt-1">Jobs / hour</div>
           </div>
         </div>
-
         <div className="flex flex-wrap gap-3 mb-8">
           <button onClick={startNext} disabled={loadingAction === 'start'} className="bg-ink text-paper px-6 py-3 rounded-full text-sm font-bold font-tech uppercase tracking-wider disabled:opacity-50">
             Start next job
@@ -170,8 +175,13 @@ const LiveQueue = () => {
           <button onClick={getPrediction} disabled={loadingAction === 'predict'} className="bg-white border border-border text-ink px-6 py-3 rounded-full text-sm font-bold font-tech uppercase tracking-wider disabled:opacity-50">
             {loadingAction === 'predict' ? 'Predicting...' : 'Predict completion'}
           </button>
+          <button onClick={fillDemo} disabled={loadingAction === 'fillDemo'} className="bg-white border border-sage/50 text-sage hover:bg-sage/5 px-6 py-3 rounded-full text-sm font-bold font-tech uppercase tracking-wider disabled:opacity-50">
+            Fill Demo
+          </button>
+          <button onClick={clearDemo} disabled={loadingAction === 'clearDemo'} className="bg-white border border-terra/50 text-terra hover:bg-terra/5 px-6 py-3 rounded-full text-sm font-bold font-tech uppercase tracking-wider disabled:opacity-50">
+            Clear Demo
+          </button>
         </div>
-
         {aiRec && (
           <div className="bg-sage/10 border border-sage/30 rounded-2xl p-6 mb-6">
             <div className="text-xs font-bold font-tech uppercase tracking-widest text-sage mb-2">AI recommendation</div>
@@ -179,7 +189,6 @@ const LiveQueue = () => {
             <p className="text-sm text-muted">{aiRec.reason}</p>
           </div>
         )}
-
         {prediction && (
           <div className="bg-terra/10 border border-terra/30 rounded-2xl p-6 mb-6">
             <div className="text-xs font-bold font-tech uppercase tracking-widest text-terra mb-2">Completion prediction</div>
@@ -187,7 +196,6 @@ const LiveQueue = () => {
             <p className="text-sm text-muted">{prediction.message}</p>
           </div>
         )}
-
         {comparison && (
           <div className="bg-white border border-border rounded-2xl p-6 mb-8">
             <div className="text-xs font-bold font-tech uppercase tracking-widest text-muted mb-4">Algorithm comparison</div>
@@ -202,25 +210,31 @@ const LiveQueue = () => {
             </div>
           </div>
         )}
-
         <div className="bg-white rounded-2xl border border-border p-8">
           <h3 className="text-xl font-black font-editorial text-ink mb-6">Queue</h3>
           <div className="flex flex-col gap-3">
             {jobs.map((job) => {
               const wait = waitMins(job.arrival_time)
-              const isAlert = wait > 15 && job.status === 'waiting'
               return (
                 <div
                   key={job.id}
                   className={`flex justify-between items-center p-4 rounded-xl border ${
-                    job.status === 'processing' ? 'bg-sage/5 border-sage/30' :
-                    isAlert ? 'bg-terra/5 border-terra/30' :
-                    'bg-paper border-border'
+                    job.status === 'processing' ? 'bg-sage/5 border-sage/30' : 'bg-paper border-border'
                   }`}
                 >
                   <div>
                     <div className="font-bold text-ink">{job.customer_name}</div>
                     <div className="text-xs text-muted">{getMetric(session.service_type).columnHeader}: {job.job_size} • Waiting {wait} min</div>
+                    {session.algorithm === 'priority' && job.priority_stars > 0 && (
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-xs text-terra">
+                          {'★'.repeat(job.priority_stars)}{'☆'.repeat(5 - job.priority_stars)}
+                        </span>
+                        {job.priority_message && (
+                          <span className="text-xs text-muted italic truncate max-w-50">{job.priority_message}</span>
+                        )}
+                      </div>
+                    )}
                     {job.emergency_id && (
                       <div className="mt-2 flex items-center gap-2">
                         <span className="text-xs text-terra font-bold">Emergency: {job.emergency_reason}</span>
@@ -231,11 +245,9 @@ const LiveQueue = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`text-xs font-bold font-tech uppercase tracking-widest px-3 py-1 rounded-full ${
-                      job.status === 'processing' ? 'bg-sage text-paper' :
-                      isAlert ? 'bg-terra text-paper' :
-                      'bg-border text-muted'
+                      job.status === 'processing' ? 'bg-sage text-paper' : 'bg-border text-muted'
                     }`}>
-                      {job.status === 'processing' ? 'Processing' : isAlert ? 'Wait alert' : 'Waiting'}
+                      {job.status === 'processing' ? 'Processing' : 'Waiting'}
                     </span>
                     {job.status === 'processing' && (
                       <button onClick={() => completeJob(job.id)} className="text-xs font-bold text-sage hover:underline">
@@ -249,11 +261,9 @@ const LiveQueue = () => {
            {jobs.length === 0 && <p className="text-muted text-center py-8">No jobs in queue yet.</p>}
           </div>
         </div>
-
         <AlgorithmExplainer currentAlgorithm={session.algorithm} />
       </main>
     </div>
   )
 }
-
 export default LiveQueue

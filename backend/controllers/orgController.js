@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { getGeneralRecommendation } from '../utils/aiAdvisor.js';
 
 export const createOrg = async (req, res) => {
   const { name, service_type } = req.body;
@@ -15,7 +16,6 @@ export const createOrg = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getMyOrgs = async (req, res) => {
   try {
     const result = await pool.query(
@@ -27,12 +27,22 @@ export const getMyOrgs = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const deleteOrg = async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM organizations WHERE id = $1 AND admin_id = $2 RETURNING id', [req.params.id, req.user.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Organization not found or unauthorized' });
     res.json({ message: 'Organization deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getOrgAiRecommendation = async (req, res) => {
+  try {
+    const { description } = req.body;
+    if (!description) return res.status(400).json({ error: 'Description required' });
+    const rec = await getGeneralRecommendation(description);
+    res.json(rec);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

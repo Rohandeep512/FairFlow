@@ -5,6 +5,7 @@ CREATE TABLE users (
   phone VARCHAR(20),
   password_hash VARCHAR(255),
   role VARCHAR(10) NOT NULL CHECK (role IN ('admin', 'customer')),
+  is_demo BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -39,6 +40,9 @@ CREATE TABLE jobs (
   start_time TIMESTAMP,
   completion_time TIMESTAMP,
   emergency_approved BOOLEAN DEFAULT FALSE,
+  priority_stars INTEGER DEFAULT 0,
+  priority_message TEXT,
+  is_demo BOOLEAN DEFAULT FALSE,
   UNIQUE(session_id, customer_id)
 );
 

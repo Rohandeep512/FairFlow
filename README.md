@@ -1,4 +1,4 @@
-# FairFlow 🚀
+# FairFlow 
 
 ## OS-Inspired Scheduling Platform for Real-World Operations
 

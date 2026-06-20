@@ -2,7 +2,6 @@ import { useState, useContext } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../utils/api.js'
 import { AuthContext } from '../context/AuthContext'
-
 const AdminRegister = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -12,7 +11,6 @@ const AdminRegister = () => {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { setUser } = useContext(AuthContext)
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -30,21 +28,17 @@ const AdminRegister = () => {
       setLoading(false)
     }
   }
-
   return (
     <div className="bg-paper bg-grid-pattern bg-grid-size min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl border border-border shadow-[0_25px_50px_-12px_rgba(40,38,31,0.1)] p-10">
         <Link to="/" className="text-2xl font-black font-editorial tracking-tight text-ink block mb-8">FairFlow.</Link>
-
         <h1 className="text-3xl font-black font-editorial tracking-tight text-ink mb-2">Create account</h1>
         <p className="text-sm text-muted mb-8">Set up your service to start managing queues</p>
-
         {error && (
           <div className="bg-terra/10 border border-terra/30 text-terra text-sm font-medium rounded-xl px-4 py-3 mb-6">
             {error}
           </div>
         )}
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="text-xs font-bold font-tech uppercase tracking-widest text-muted block mb-2">Name</label>
@@ -97,7 +91,6 @@ const AdminRegister = () => {
               </button>
             </div>
           </div>
-
           <button
             type="submit"
             disabled={loading}
@@ -106,7 +99,6 @@ const AdminRegister = () => {
             {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
-
         <p className="text-sm text-muted text-center mt-6">
           Already have an account?{' '}
           <Link to="/admin/login" className="text-terra font-bold hover:underline">Log in</Link>
@@ -115,5 +107,4 @@ const AdminRegister = () => {
     </div>
   )
 }
-
 export default AdminRegister

@@ -1,7 +1,6 @@
 import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
 export const adminRegister = async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
@@ -19,7 +18,6 @@ export const adminRegister = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'All fields required' });
@@ -35,7 +33,6 @@ export const adminLogin = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const customerJoin = async (req, res) => {
   const { join_code, name, phone } = req.body;
   if (!join_code || !name || !phone) return res.status(400).json({ error: 'All fields required' });
@@ -46,15 +43,20 @@ export const customerJoin = async (req, res) => {
     );
     if (!session.rows.length) return res.status(400).json({ error: 'Invalid or expired queue code' });
     const session_id = session.rows[0].id;
-
     const existingUser = await pool.query('SELECT id FROM users WHERE phone = $1 AND role = $2', [phone, 'customer']);
     let customer_id;
     if (existingUser.rows.length) {
       customer_id = existingUser.rows[0].id;
-      // Update name in case they are rejoining with the same phone but a different name
       await pool.query('UPDATE users SET name = $1 WHERE id = $2', [name, customer_id]);
-      const existingJob = await pool.query('SELECT id FROM jobs WHERE session_id = $1 AND customer_id = $2', [session_id, customer_id]);
-      if (existingJob.rows.length) return res.status(400).json({ error: 'Already joined this queue' });
+      const existingJob = await pool.query('SELECT id, status FROM jobs WHERE session_id = $1 AND customer_id = $2', [session_id, customer_id]);
+      if (existingJob.rows.length) {
+        if (existingJob.rows[0].status === 'completed') {
+          await pool.query('DELETE FROM jobs WHERE id = $1', [existingJob.rows[0].id]);
+        } else {
+          const token = jwt.sign({ id: customer_id, role: 'customer', session_id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+          return res.json({ token, session_id, customer_id, name, already_in_queue: true });
+        }
+      }
     } else {
       const newUser = await pool.query(
         'INSERT INTO users (name, phone, role) VALUES ($1, $2, $3) RETURNING id',
@@ -62,14 +64,12 @@ export const customerJoin = async (req, res) => {
       );
       customer_id = newUser.rows[0].id;
     }
-
     const token = jwt.sign({ id: customer_id, role: 'customer', session_id }, process.env.JWT_SECRET, { expiresIn: '1d' });
     res.json({ token, session_id, customer_id, name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const getMe = async (req, res) => {
   try {
     const result = await pool.query(
