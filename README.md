@@ -1,13 +1,16 @@
 # FairFlow
-<img width="1882" height="960" alt="image" src="https://github.com/user-attachments/assets/d23051ee-404e-40b2-8b91-ab51f051e025" />
 
 
 <table>
   <tr>
-    <td><img width="100%" alt="FairFlow Landing Page" src="https://github.com/user-attachments/assets/ab536c9c-6a88-4b2e-abdd-de7acdcd4f93" /></td>
-    <td><img width="100%" alt="FairFlow Admin Dashboard" src="https://github.com/user-attachments/assets/d23051ee-404e-40b2-8b91-ab51f051e025" /></td>
+    <td colspan="2"><img width="100%" alt="FairFlow Screenshot 1" src="https://github.com/user-attachments/assets/ab536c9c-6a88-4b2e-abdd-de7acdcd4f93" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img width="100%" alt="FairFlow Screenshot 2" src="https://github.com/user-attachments/assets/9cf2e835-08a1-4d9e-a6a7-3d9150de16bc" /></td>
+    <td width="50%"><img width="100%" alt="FairFlow Screenshot 3" src="https://github.com/user-attachments/assets/d23051ee-404e-40b2-8b91-ab51f051e025" /></td>
   </tr>
 </table>
+
 
 A full-stack queue management system that applies classic Operating System CPU scheduling algorithms — FCFS, Shortest Job First, Round Robin, and Priority with Aging — to real-world service workflows like print shops, lab equipment booking, clinics, and support desks. Built to bridge academic OS theory with a working, production-style product.
 
