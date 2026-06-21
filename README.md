@@ -1,9 +1,11 @@
 # FairFlow
+<img width="1882" height="960" alt="image" src="https://github.com/user-attachments/assets/d23051ee-404e-40b2-8b91-ab51f051e025" />
+
 
 <table>
   <tr>
-    <td><img width="100%" alt="FairFlow Landing Page" src="PASTE_SCREENSHOT_1_LINK_HERE" /></td>
-    <td><img width="100%" alt="FairFlow Admin Dashboard" src="PASTE_SCREENSHOT_2_LINK_HERE" /></td>
+    <td><img width="100%" alt="FairFlow Landing Page" src="https://github.com/user-attachments/assets/ab536c9c-6a88-4b2e-abdd-de7acdcd4f93" /></td>
+    <td><img width="100%" alt="FairFlow Admin Dashboard" src="https://github.com/user-attachments/assets/d23051ee-404e-40b2-8b91-ab51f051e025" /></td>
   </tr>
 </table>
 
