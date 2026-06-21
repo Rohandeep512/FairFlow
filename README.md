@@ -71,38 +71,52 @@ In environments like campus print shops, hospital OPDs, and lab equipment bookin
 
 ### 1. Clone the repository
 
+```bash
 git clone https://github.com/Rohandeep512/FairFlow.git
 cd FairFlow
+```
 
 ### 2. Setup the backend
 
+```bash
 cd backend
 npm install
+```
 
 Create a `.env` file in `/backend`:
 
+```
 PORT=5000
 DATABASE_URL=your_postgres_connection_string
 JWT_SECRET=your_jwt_secret
 OPENROUTER_API_KEY=your_openrouter_api_key
+```
 
 Run the schema and start the backend:
 
+```bash
 psql -d your_database -f schema.sql
 npm run dev
+```
 
 ### 3. Setup the frontend
 
+```bash
 cd frontend
 npm install
+```
 
 Create a `.env` file in `/frontend`:
 
+```
 VITE_API_URL=http://localhost:5000/api
+```
 
 Start the frontend:
 
+```bash
 npm run dev
+```
 
 Now open `http://localhost:5173` in your browser.
 
@@ -124,6 +138,7 @@ Now open `http://localhost:5173` in your browser.
 
 ## Project Structure
 
+```
 FairFlow/
 │
 ├── backend/
@@ -149,6 +164,7 @@ FairFlow/
 │   └── package.json
 │
 └── README.md
+```
 
 ## Scheduling Algorithms Explained
 
