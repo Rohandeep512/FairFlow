@@ -1,7 +1,7 @@
 const ALGORITHMS = [
   {
     key: 'fcfs',
-    name: 'First-Come, First-Serve',
+    name: 'First Come, First Serve',
     emoji: '🎟️',
     tagline: 'The Classic Line',
     explanation:
@@ -15,7 +15,7 @@ const ALGORITHMS = [
     emoji: '⚡',
     tagline: 'The Express Lane',
     explanation:
-      'Got a 2-minute task? Jump ahead of the 45-minute projects.',
+      'Got a 2 minute task? Jump ahead of the 45 minute projects.',
     bestFor: 'Clearing out crowded rooms fast.',
     color: 'terra',
   },

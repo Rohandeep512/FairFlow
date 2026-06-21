@@ -1,173 +1,192 @@
-# FairFlow 
+# FairFlow
 
-## OS-Inspired Scheduling Platform for Real-World Operations
+<table>
+  <tr>
+    <td><img width="100%" alt="FairFlow Landing Page" src="PASTE_SCREENSHOT_1_LINK_HERE" /></td>
+    <td><img width="100%" alt="FairFlow Admin Dashboard" src="PASTE_SCREENSHOT_2_LINK_HERE" /></td>
+  </tr>
+</table>
 
-FairFlow is a smart queue management system that applies classic Operating System (OS) CPU scheduling algorithms to optimize real-world service workflows. Instead of relying on rigid, inefficient **First-Come, First-Serve** queues, FairFlow intelligently manages demand to minimize wait times and maximize throughput.
+A full-stack queue management system that applies classic Operating System CPU scheduling algorithms — FCFS, Shortest Job First, Round Robin, and Priority with Aging — to real-world service workflows like print shops, lab equipment booking, clinics, and support desks. Built to bridge academic OS theory with a working, production-style product.
 
----
+## Demo
+
+Live app: [FairFlow on Vercel](https://fair-flow.vercel.app/)
+
+🔒 **Note:** Admin passwords are hashed using `bcrypt` before storage and JWT is used for session authentication. Credentials are never visible to the developer.
 
 ## The Problem
 
-In environments like **Campus Print Shops, Hospital OPDs, and Lab Equipment Booking**, simple queueing often leads to bottlenecks where small, urgent tasks get stuck behind massive projects. This results in frustration and wasted time.
+In environments like campus print shops, hospital OPDs, and lab equipment booking, a simple first-come-first-serve line often creates bottlenecks — a 2-minute task gets stuck behind a 45-minute one, and urgent requests have no way to jump ahead fairly. FairFlow solves this by letting admins pick a scheduling strategy suited to their queue, the same way an OS scheduler picks which process runs next.
 
-FairFlow solves this by applying proven scheduling techniques from Operating Systems to real-world workflows.
+## Features
 
----
+**Admin Authentication**
+- JWT-based login/register for queue admins
+- Passwords hashed with bcrypt before storage
+- Protected admin routes on both frontend and backend
 
-## Key Features
+**Multiple Scheduling Algorithms**
+- First-Come, First-Serve (FCFS) — the classic line
+- Shortest Job First (SJF) — express lane for quick tasks
+- Round Robin — guaranteed fair time-slice rotation
+- Priority + Aging — urgent requests get priority, but waiting requests gain priority over time so nobody starves
 
-### 🧠 Intelligent Scheduling
-Switch between algorithms like:
-- Shortest Job First (SJF)
-- Round Robin
-- Priority Scheduling
-- Aging-Based Scheduling
+**AI-Powered Recommendations**
+- Queue traffic is analyzed via the OpenRouter API to suggest the best-fit scheduling algorithm
+- AI completion-time predictions, cached per session to avoid redundant calls
 
-to suit your operational needs.
+**Live Queue Tracking**
+- Customers join via a simple code — no app, no sign-up
+- Real-time queue status and position updates
+- Emergency request flow with admin approval
 
-### 🤖 AI-Powered Advisor
-Uses advanced AI to analyze queue traffic and recommend the optimal scheduling algorithm for maximum efficiency.
-
-### 📊 Real-Time Tracking
-Dynamic job allocation and live queue updates ensure customers always know their status.
-
-### 📱 Responsive UI
-Built for mobile-first usage, allowing users to join queues through a simple link or QR code.
-
----
-
-## Motivation
-
-FairFlow was built to bridge the gap between academic Operating System theory and real-world operational bottlenecks.
-
-The goal was to demonstrate that intelligent resource management isn't limited to CPUs—it can be applied to people, services, and workflows. By reimagining how we wait, FairFlow transforms everyday queues into efficient, organized, and fair experiences.
-
----
-
-## Future Enhancements
-
-- 📈 **Advanced Queue Analytics**
-  - Admin dashboard for visualizing peak hours and resource bottlenecks.
-
-- 🔮 **Predictive Wait-Time Models**
-  - Use historical queue data to provide accurate waiting-time estimates.
-
-- 💬 **SMS / WhatsApp Integration**
-  - Automatic notifications when a user's turn is approaching.
-
-- 🏢 **Multi-Tenant Support**
-  - Multiple organizations or departments managing independent queues under one platform.
-
-- ⚡ **Dynamic Priority Tuning**
-  - AI-driven priority adjustments based on real-time urgency and queue conditions.
-
----
+**Distinctive UI**
+- Editorial-style design system (Fraunces serif headlines, Space Grotesk labels, Inter body text)
+- Built deliberately to avoid generic SaaS/AI-template aesthetics
 
 ## Tech Stack
 
-### Frontend
-- React
-- Vite
-- Tailwind CSS
+**Frontend:**
+- React (Vite)
+- Tailwind CSS v4
+- Lucide Icons
 - React Router
-- Lucide React
 
-### Backend
-- Node.js
-- Express.js
+**Backend:**
+- Node.js + Express (ES Modules)
 - PostgreSQL
-- pg (node-postgres)
+- JWT authentication
+- bcrypt for password hashing
 
-### Intelligence Layer
-- OpenRouter API
-- Gemini / LLM Integration
+**Intelligence Layer:**
+- OpenRouter API (AI recommendations & completion prediction)
 
----
+**Deployment:**
+- Frontend: Vercel
+- Backend: Render
+- Database: PostgreSQL
 
-## Getting Started
+## Installation & Setup
 
-### Prerequisites
+### 1. Clone the repository
 
-- Node.js (v18+)
-- PostgreSQL
-- Git
-
-### Installation
-
-#### 1. Clone the Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/FairFlow.git
+git clone https://github.com/Rohandeep512/FairFlow.git
 cd FairFlow
-```
 
-#### 2. Install Dependencies
+### 2. Setup the backend
 
-```bash
-# Backend dependencies
 cd backend
 npm install
 
-# Frontend dependencies
-cd ../frontend
-npm install
-```
+Create a `.env` file in `/backend`:
 
-#### 3. Environment Setup
-
-Create a `.env` file inside the `backend/` directory:
-
-```env
-DATABASE_URL=your_postgres_connection_string
-OPENROUTER_API_KEY=your_openrouter_api_key
 PORT=5000
-```
+DATABASE_URL=your_postgres_connection_string
+JWT_SECRET=your_jwt_secret
+OPENROUTER_API_KEY=your_openrouter_api_key
 
-#### 4. Run the Project
+Run the schema and start the backend:
 
-```bash
-# Start backend server
-cd backend
+psql -d your_database -f schema.sql
 npm run dev
 
-# Start frontend
-cd ../frontend
+### 3. Setup the frontend
+
+cd frontend
+npm install
+
+Create a `.env` file in `/frontend`:
+
+VITE_API_URL=http://localhost:5000/api
+
+Start the frontend:
+
 npm run dev
-```
 
----
-
-## Scheduling Algorithms Explained
-
-### First-Come, First-Serve (FCFS)
-The classic queue system. Jobs are processed in the exact order they arrive.
-
-### Shortest Job First (SJF)
-The express lane. Smaller tasks are completed first, reducing overall waiting time.
-
-### Round Robin
-The fair-share approach. Every task gets a time slice before the next one is processed.
-
-### Priority + Aging
-Urgent tasks receive higher priority, while aging ensures that low-priority tasks eventually move forward and never starve.
-
----
+Now open `http://localhost:5173` in your browser.
 
 ## Deployment
 
-### Backend
-- Render
+### Backend (Render)
+1. Create a new **Web Service** on Render
+2. Connect your GitHub repo → set **Root Directory** to `backend`
+3. Add environment variables: `DATABASE_URL`, `JWT_SECRET`, `OPENROUTER_API_KEY`, `PORT`
+4. Build Command: `npm install`
+5. Start Command: `npm start`
 
-### Frontend
-- Vercel
+### Frontend (Vercel)
+1. Import your GitHub repo into Vercel
+2. Set **Root Directory** to `frontend`
+3. Add environment variable: `VITE_API_URL=https://your-backend.onrender.com/api`
+4. Build Command: `npm run build` (auto-detected)
+5. Output Directory: `dist` (auto-detected for Vite)
 
----
+## Project Structure
 
-## Author
+FairFlow/
+│
+├── backend/
+│   ├── config/             # Database connection setup
+│   ├── controllers/        # Auth, queue, scheduling, and AI controllers
+│   ├── middleware/         # JWT verification middleware
+│   ├── routes/             # Express route definitions
+│   ├── utils/              # Scheduling algorithm logic
+│   ├── migrate_demo.js     # Demo data migration script
+│   ├── migrate_priority.js # Priority/aging migration script
+│   ├── schema.sql          # PostgreSQL schema
+│   └── server.js           # Express app entry point
+│
+├── frontend/
+│   ├── src/
+│   │   ├── assets/         # Static assets
+│   │   ├── components/     # Reusable UI components
+│   │   ├── context/        # React context providers
+│   │   ├── pages/          # Landing, AdminLogin, Dashboard, LiveQueue, etc.
+│   │   ├── utils/          # Frontend helper functions
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── package.json
+│
+└── README.md
 
-**Rohandeep Singh**  
-NSUT | Software Engineering Enthusiast | Full-Stack Developer
+## Scheduling Algorithms Explained
 
----
+**First-Come, First-Serve (FCFS)**
+The classic queue. Jobs are processed in the exact order they arrive. Best for queues where every task takes roughly the same time.
+
+**Shortest Job First (SJF)**
+The express lane. Smaller tasks are completed first, reducing average wait time across the whole queue. Best for clearing crowded rooms fast.
+
+**Round Robin**
+The fair-share approach. Every task gets a guaranteed time slice before rotating to the next. Best for shared resources like sports courts or gaming setups.
+
+**Priority + Aging**
+Urgent requests get priority access, but normal requests slowly gain priority the longer they wait — so nobody is left behind. Best for triage-style scenarios like clinics or emergency desks.
+
+## Key Learnings
+
+- Translating abstract OS scheduling theory (FCFS, SJF, Round Robin, Priority + Aging) into a working, testable backend
+- Spec-first development — defining logic guards and database constraints before writing code, after learning the cost of unplanned logic in an earlier project
+- Designing a distinctive, non-templated UI system instead of defaulting to generic dashboard aesthetics
+- Integrating an AI API (OpenRouter) for queue analysis and completion-time prediction, with response caching to control cost
+- Structuring an ES-module Node.js backend with clean separation of concerns
+
+## Future Improvements
+
+- Admin analytics dashboard for peak hours and bottleneck visualization
+- SMS/WhatsApp notifications when a customer's turn is approaching
+- Multi-tenant support for multiple organizations/departments
+- Predictive wait-time models trained on historical queue data
+
+## Author/Developer
+
+Rohandeep Singh
+
+NSUT | Full-Stack Developer
+
+LinkedIn: [Rohandeep Singh](https://www.linkedin.com/in/rohandeep-singh-283465323/)
+
+GitHub: [@Rohandeep512](https://github.com/Rohandeep512)
 
 ⭐ If you found this project interesting, consider giving it a star!

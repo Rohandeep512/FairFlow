@@ -19,8 +19,9 @@ const Landing = () => {
       </nav>
       <div className="bg-[#EBE7DA] text-muted/70 py-2.5 border-b border-border overflow-hidden flex" style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}>
         <div className="animate-marquee inline-block whitespace-nowrap font-tech font-semibold uppercase tracking-widest text-[11px]">
-          <span className="text-sage">&nbsp;/// SYSTEM STATUS:</span> FCFS ALGORITHM CAUSING BOTTLENECKS IN PHYSICAL QUEUES <span className="text-terra">/// OPTIMIZING RESOURCE ALLOCATION ///</span> PREVENTING STARVATION WITH AGING
-          <span className="text-sage">&nbsp;/// SYSTEM STATUS:</span> FCFS ALGORITHM CAUSING BOTTLENECKS IN PHYSICAL QUEUES <span className="text-terra">/// OPTIMIZING RESOURCE ALLOCATION ///</span> PREVENTING STARVATION WITH AGING
+          <span className="text-sage">&nbsp;/// SYSTEM STATUS:</span> SIMPLE LINES CAUSE LONG WAITS <span className="text-terra">/// NOW OPTIMIZING WHO GETS SERVED NEXT ///</span> MAKING SURE NO ONE WAITS FOREVER&nbsp;
+          <span className="text-sage">&nbsp;/// SYSTEM STATUS:</span> SIMPLE LINES CAUSE LONG WAITS <span className="text-terra">/// NOW OPTIMIZING WHO GETS SERVED NEXT ///</span> MAKING SURE NO ONE WAITS FOREVER&nbsp;
+          <span className="text-sage">&nbsp;/// SYSTEM STATUS:</span> SIMPLE LINES CAUSE LONG WAITS <span className="text-terra">/// NOW OPTIMIZING WHO GETS SERVED NEXT ///</span> MAKING SURE NO ONE WAITS FOREVER&nbsp;
         </div>
       </div>
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24 flex flex-col lg:flex-row items-center gap-16">
@@ -33,7 +34,7 @@ const Landing = () => {
             <em className="text-sage font-bold leading-[0.9]">Zero chaos.</em>
           </h1>
           <p className="text-lg text-muted max-w-lg mb-10 leading-relaxed font-medium">
-            FairFlow applies CPU scheduling algorithms to physical workflows. Whether allocating lab equipment, booking sports courts, or managing clinic patients — guarantee fairness without the bottleneck.
+            FairFlow applies CPU scheduling algorithms to physical workflows. Whether allocating lab equipment, booking sports courts, or managing clinic patients, guarantee everyone gets a fair turn, fast.
           </p>
           <div className="flex flex-wrap gap-4">
             <button
@@ -80,7 +81,7 @@ const Landing = () => {
         <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-border bg-paper">
           <div className="font-editorial text-4xl text-sage font-black mb-4">02</div>
           <h4 className="font-tech font-bold uppercase text-lg mb-2 text-ink">Share a code</h4>
-          <p className="text-sm text-muted leading-relaxed font-medium">Hand your visitors a simple code. They join the line from their phone in seconds — no apps to download, no sign-ups required. Just their name and they're in.</p>
+          <p className="text-sm text-muted leading-relaxed font-medium">Hand your visitors a simple code. They join the line from their phone in seconds. No apps to download, no sign ups required. Just their name and they're in.</p>
         </div>
         <div className="p-8 md:p-12 hover:bg-[#FAFAFA] transition-colors">
           <div className="font-editorial text-4xl text-terra font-black mb-4">03</div>
