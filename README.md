@@ -208,6 +208,4 @@ NSUT | Full-Stack Developer
 
 LinkedIn: [Rohandeep Singh](https://www.linkedin.com/in/rohandeep-singh-283465323/)
 
-GitHub: [@Rohandeep512](https://github.com/Rohandeep512)
-
 ⭐ If you found this project interesting, consider giving it a star!
